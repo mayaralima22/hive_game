@@ -139,15 +139,12 @@ class State:
             for n in get_neighbors(coordinate):
                 players[player].add(n)
 
-        # All neighbors to any tile placed by current player...
         coordinates = players[self.player()]
 
-        # ...except where the opponent is neighbour...
         for p in players:
             if p != self.player():
                 coordinates.difference_update(players[p])
 
-        # ...and you cannot place on top of another tile.
         coordinates.difference_update(self.grid.keys())
 
         return coordinates
@@ -187,29 +184,23 @@ class State:
 
     def available_moves(self):
         if not self.grid:
-            # If nothing is placed, one must place something anywhere
             anywhere = (0, 0, 0)
 
             return self.enumerate_hand(self.player(), [anywhere])
 
         if len(self.grid) == 1:
-            # If single tile is placed, opponent places at neighbor
             start_tile = next(iter(self.grid))
 
             return self.enumerate_hand(self.player(), list(get_neighbors(start_tile)))
 
         placements = self.placeable()
 
-        # If queen is still on hand...
         if self.player().hand[self.queen] > 0:
-            # ...it must be placed on round 4
             if self.round() + 1 == 4:
                 return [('place', self.queen, c) for c in placements]
 
-            # ...otherwise only placements...
             return list(self.enumerate_hand(self.player(), placements))
 
-        # ...but normally placements and movements
         available = list(self.enumerate_hand(self.player(), placements)) + list(self.movements())
 
         if not available:
